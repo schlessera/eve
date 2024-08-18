@@ -8,7 +8,7 @@ export default class Menu extends Command {
   static description = 'Suggest a menu based around a given theme'
 
   async run(): Promise<void> {
-    const {args, flags} = await this.parse(Menu)
+    const {args} = await this.parse(Menu)
 
     this.log(`Suggesting a menu around the theme of ${args.theme}:`)
     

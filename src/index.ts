@@ -1,12 +1,13 @@
-import { configureGenkit, ConfigOptions } from '@genkit-ai/core';
+import { ConfigOptions, configureGenkit } from '@genkit-ai/core';
 import { startFlowsServer } from '@genkit-ai/flow';
 import { googleAI } from '@genkit-ai/googleai';
 
-import { menuSuggestionFlow } from './flows/menuSuggestionFlow';
+import { menuSuggestionFlow } from './flows/menu-suggestion-flow';
 
 configureGenkit({
   // Perform OpenTelemetry instrumentation and enable trace collection.
   enableTracingAndMetrics: true,
+  flows: [menuSuggestionFlow],
   // Log debug output to tbe console.
   logLevel: 'debug',
   plugins: [
@@ -16,7 +17,6 @@ configureGenkit({
     // the recommended practice.
     googleAI(),
   ],
-  flows: [menuSuggestionFlow],
 } as ConfigOptions);
 
 // Start a flow server, which exposes your flows as HTTP endpoints. This call
