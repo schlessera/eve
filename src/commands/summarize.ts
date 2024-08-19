@@ -1,8 +1,8 @@
-import { runFlow } from '@genkit-ai/flow';
+import { streamFlow } from '@genkit-ai/flow';
 import { Args, Command, Flags } from '@oclif/core';
 
 import { initializeGenKit } from '../genkit';
-import { summarizeFlow } from '../genkit/summarize-flow';
+import { summarizeFlow } from '../genkit/flows/summarize-flow';
 
 export default class Summarize extends Command {
   static args = {
@@ -19,7 +19,11 @@ export default class Summarize extends Command {
     const { args, flags }: { args: { input: string }; flags: { length: number } } = await this.parse(Summarize);
 
     await initializeGenKit(false);
-    const response: string = await runFlow(summarizeFlow, { input: args.input, length: flags.length });
-    this.log(response);
+    const response = await streamFlow(summarizeFlow, { input: args.input, length: flags.length });
+    for await (const chunk of response.stream()) {
+      if (typeof chunk === 'string') {
+        process.stdout.write(chunk);
+      }
+    }
   }
 }

@@ -6,7 +6,7 @@ export async function initializeGenKit(debug: boolean): Promise<void> {
         // Perform OpenTelemetry instrumentation and enable trace collection.
         enableTracingAndMetrics: true,
         // Log debug output to the console.
-        logLevel: debug === true ? 'debug' : 'warn',
+        logLevel: debug === true ? 'debug' : 'error',
         plugins: [
             // Load the Google AI plugin. You can optionally specify your API key
             // by passing in a config object; if you don't, the Google AI plugin uses
@@ -19,5 +19,4 @@ export async function initializeGenKit(debug: boolean): Promise<void> {
     };
 
     configureGenkit(config);
-    console.log('GenKit initialized');
 }
