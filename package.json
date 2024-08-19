@@ -29,7 +29,7 @@
     "eslint": "^8",
     "eslint-config-oclif": "^5",
     "eslint-config-oclif-typescript": "^3",
-    "eslint-config-prettier": "^9",
+    "eslint-config-prettier": "^9.1.0",
     "mocha": "^10",
     "oclif": "^4",
     "shx": "^0.3.3",
@@ -60,19 +60,13 @@
     "dirname": "eve",
     "commands": "./dist/commands",
     "plugins": [
-      "@oclif/plugin-help",
-      "@oclif/plugin-plugins"
-    ],
-    "topicSeparator": " ",
-    "topics": {
-      "hello": {
-        "description": "Say hello to the world and others"
-      }
-    }
+      "@oclif/plugin-help"
+    ]
   },
   "repository": "schlessera/eve",
   "scripts": {
-    "build": "shx rm -rf dist && tsc -b",
+    "build": "tsc -b",
+    "build:clean": "shx rm -rf dist && tsc -b",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "postpack": "shx rm -f oclif.manifest.json",
