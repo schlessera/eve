@@ -7,6 +7,7 @@ import { summarizeFlow } from '../genkit/flows/summarize-flow';
 export default class Summarize extends Command {
   static args = {
     input: Args.string({ description: 'Input to summarize', required: true }),
+    additionalContext: Args.string({ description: 'Additional context to consider when summarizing the input', required: false }),
   };
 
   static description: string = 'Summarize a given input';
@@ -16,10 +17,10 @@ export default class Summarize extends Command {
   };
 
   public async run(): Promise<void> {
-    const { args, flags }: { args: { input: string }; flags: { length: number } } = await this.parse(Summarize);
+    const { args, flags }: { args: { input: string, additionalContext: string | undefined }; flags: { length: number } } = await this.parse(Summarize);
 
     await initializeGenKit(false);
-    const response = await streamFlow(summarizeFlow, { input: args.input, length: flags.length });
+    const response = await streamFlow(summarizeFlow, { input: args.input, additionalContext: args.additionalContext, length: flags.length });
     for await (const chunk of response.stream()) {
       if (typeof chunk === 'string') {
         process.stdout.write(chunk);

@@ -9,14 +9,24 @@ import { StreamingCallback } from '@genkit-ai/core';
 // Define a simple flow that prompts an LLM to summarize text.
 export const summarizeFlow = defineFlow(
   {
-    inputSchema: z.object({ input: z.string(), length: z.number() }),
+    inputSchema: z.object({ input: z.string(), additionalContext: z.optional(z.string()), length: z.number() }),
     name: 'summarizeFlow',
     streamSchema: z.string(),
   },
-  async ({ input, length }: { input: string; length: number }, streamingCallback: StreamingCallback<string> | undefined) => {
+  async (
+    { input, additionalContext, length }: {
+      input: string,
+      additionalContext?: string | undefined,
+      length: number,
+    }, streamingCallback: StreamingCallback<string> | undefined) => {
     if (!streamingCallback) {
       throw new Error('this flow only works in streaming mode');
-    }    
+    }
+
+    let context = '';
+    if (additionalContext) {
+      context = 'The information between the following placeholders is additional context - consider it while creating the summary, but do not directly include it as the content to summarize: {{{ ' + additionalContext + ' }}}';
+    }
 
     // Construct a request and send it to the model API.
     const { response, stream } = await generateStream({
@@ -25,7 +35,10 @@ export const summarizeFlow = defineFlow(
       },
       model: gemini15Flash,
       tools: [readLocalFile],
-      prompt: `I want you to summarize a piece of text I provide. Don't explain your reasoning, just produce the final summarized output. The target length of the summary is ${length} words. If the input looks like a filename, assume it is on the local filesystem and read its contents to summarize that content. Input: ${input}`,
+      prompt: `I want you to summarize a piece of text I provide. Don't explain your reasoning and don't directly include any parts of the input, just produce the final summarized output. The target length of the summary is ${length} words. If the input looks like a filename, assume it is on the local filesystem and read its contents to summarize that content. Only produces raw text without any formatting. ${context} Input: ${input}`,
+      output: {
+        format: 'text',
+      },
     });
 
     for await (const chunk of stream()) {
