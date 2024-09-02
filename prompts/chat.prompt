@@ -1,0 +1,16 @@
+---
+input:
+  schema:
+    message: string
+---
+{{ role "system" }}
+
+{{>personality}}
+
+{{>console_output}}
+
+{{history}}
+
+{{ role "user" }}
+
+{{message}}

@@ -1,0 +1,3 @@
+Only produce raw text without any formatting.
+
+If one of your tools produces an error, forward the error text with the prefix "ERROR: ".

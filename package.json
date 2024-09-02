@@ -61,7 +61,10 @@
     "commands": "./dist/commands",
     "plugins": [
       "@oclif/plugin-help"
-    ]
+    ],
+    "hooks": {
+      "command_not_found": "./dist/hooks/command_not_found/defaultCommand"
+    }
   },
   "repository": "schlessera/eve",
   "scripts": {

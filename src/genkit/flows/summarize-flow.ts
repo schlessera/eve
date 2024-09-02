@@ -1,51 +1,73 @@
 // Import the Genkit core libraries and plugins.
-import { generateStream } from '@genkit-ai/ai';
-import { defineFlow } from '@genkit-ai/flow';
-import { gemini15Flash } from '@genkit-ai/googleai';
-import * as z from 'zod';
-import { readLocalFile } from '../tools/read-local-file';
-import { StreamingCallback } from '@genkit-ai/core';
+import {defineFlow} from '@genkit-ai/flow'
+import * as z from 'zod'
+import {StreamingCallback} from '@genkit-ai/core'
+import {promptRef} from '@genkit-ai/dotprompt'
+import {PromptGenerateOptions} from '@genkit-ai/dotprompt/lib/prompt'
+import {defineReadLocalFileTool} from '../tools/read-local-file'
 
-// Define a simple flow that prompts an LLM to summarize text.
-export const summarizeFlow = defineFlow(
-  {
-    inputSchema: z.object({ input: z.string(), additionalContext: z.optional(z.string()), length: z.number() }),
-    name: 'summarizeFlow',
-    streamSchema: z.string(),
-  },
-  async (
-    { input, additionalContext, length }: {
-      input: string,
-      additionalContext?: string | undefined,
-      length: number,
-    }, streamingCallback: StreamingCallback<string> | undefined) => {
-    if (!streamingCallback) {
-      throw new Error('this flow only works in streaming mode');
-    }
-
-    let context = '';
-    if (additionalContext) {
-      context = 'The information between the following placeholders is additional context - consider it while creating the summary, but do not directly include it as the content to summarize: {{{ ' + additionalContext + ' }}}';
-    }
-
-    // Construct a request and send it to the model API.
-    const { response, stream } = await generateStream({
-      config: {
-        temperature: 1,
+// The entire flow definition needs to be contained within a function,
+// in order to not immediately trigger it during OCLIF's command loading.
+export function defineSummarizeFlow() {
+  // Define a simple flow that prompts an LLM to summarize text.
+  const summarizeFlow = defineFlow(
+    {
+      inputSchema: z.object({input: z.string(), additionalContext: z.optional(z.string()), length: z.number()}),
+      name: 'summarizeFlow',
+      streamSchema: z.string(),
+    },
+    async (
+      {
+        input,
+        additionalContext,
+        length,
+      }: {
+        input: string
+        additionalContext?: string | undefined
+        length: number
       },
-      model: gemini15Flash,
-      tools: [readLocalFile],
-      prompt: `I want you to summarize a piece of text I provide. Don't explain your reasoning and don't directly include any parts of the input, just produce the final summarized output. The target length of the summary is ${length} words. If the input looks like a filename, assume it is on the local filesystem and read its contents to summarize that content. Only produces raw text without any formatting. ${context} Input: ${input}`,
-      output: {
-        format: 'text',
-      },
-    });
+      streamingCallback: StreamingCallback<string> | undefined,
+    ) => {
+      // Intercept console.log here, as the prompt loading produces debugging output for partials.
+      const originalConsoleLog = console.log
+      console.log = () => {}
+      const summarizePrompt = await promptRef('summarize').loadPrompt()
+      console.log = originalConsoleLog
 
-    for await (const chunk of stream()) {
-      if (chunk.content[0].text) {
-        streamingCallback(chunk.content[0].text);
+      let context = ''
+      if (additionalContext) {
+        context =
+          'The information between the following placeholders is additional context - consider it while creating the summary, but do not directly include it as the content to summarize: {{{ ' +
+          additionalContext +
+          ' }}}'
       }
-    }
-    return (await response()).text();
-  }
-);
+
+      const readLocalFile = defineReadLocalFileTool()
+
+      const options: PromptGenerateOptions = {
+        model: 'googleai/gemini-1.5-flash-latest',
+        input: {
+          input: input,
+          context: context,
+          length: length,
+        },
+        tools: [readLocalFile],
+      }
+
+      if (streamingCallback) {
+        const {response, stream} = await summarizePrompt.generateStream(options)
+
+        for await (const chunk of stream()) {
+          if (chunk.content[0].text) {
+            streamingCallback(chunk.content[0].text)
+          }
+        }
+        return (await response()).text()
+      } else {
+        const response = await summarizePrompt.generate(options)
+        return response.text
+      }
+    },
+  )
+  return summarizeFlow
+}

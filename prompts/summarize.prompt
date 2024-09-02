@@ -1,0 +1,33 @@
+---
+input:
+  schema:
+    input: string
+    length?: integer
+    context?: string
+  default:
+    length: 100
+---
+{{ role "system" }}
+
+{{>personality}}
+
+{{>console_output}}
+
+{{ role "user" }}
+
+I want you to summarize a piece of text I provide.
+
+Don't explain your reasoning and don't directly include any parts of the input,
+just produce the final summarized output.
+
+The target length of the summary is {{length}} words.
+
+If the input looks like a filename, assume it is on the local filesystem and
+read its contents to summarize that content.
+
+{{#if context}}
+
+{{context}}
+{{/if}}
+
+Input: {{input}}
