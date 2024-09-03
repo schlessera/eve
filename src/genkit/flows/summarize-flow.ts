@@ -4,6 +4,7 @@ import * as z from 'zod'
 import {StreamingCallback} from '@genkit-ai/core'
 import {promptRef} from '@genkit-ai/dotprompt'
 import {PromptGenerateOptions} from '@genkit-ai/dotprompt/lib/prompt'
+import {defineIsLocalFilepathTool} from '../tools/is-local-filepath'
 import {defineReadLocalFileTool} from '../tools/read-local-file'
 
 // The entire flow definition needs to be contained within a function,
@@ -42,6 +43,7 @@ export function defineSummarizeFlow() {
           ' }}}'
       }
 
+      const isLocalFilepath = defineIsLocalFilepathTool()
       const readLocalFile = defineReadLocalFileTool()
 
       const options: PromptGenerateOptions = {
@@ -51,7 +53,7 @@ export function defineSummarizeFlow() {
           context: context,
           length: length,
         },
-        tools: [readLocalFile],
+        tools: [isLocalFilepath, readLocalFile],
       }
 
       if (streamingCallback) {

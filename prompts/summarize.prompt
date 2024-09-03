@@ -15,19 +15,35 @@ input:
 
 {{ role "user" }}
 
-I want you to summarize a piece of text I provide.
+## Step 1: Identify the input type
 
-Don't explain your reasoning and don't directly include any parts of the input,
-just produce the final summarized output.
+Please provide the content you want summarized. This could be either:
+
+* **Direct text:** Simply type the content you want summarized.
+* **Local file path:** Provide the absolute path to a local file containing the content.
+
+I will use the `is_local_filepath` tool to determine the type of input you provided.
+
+## Step 2: Process the input
+
+If you provided direct text, I will directly summarize it using the `summarize` tool.
+
+If you provided a local file path, I will use the `readLocalFile` tool to read the file's contents and then summarize the contents using the `summarize` tool.
 
 The target length of the summary is {{length}} words.
-
-If the input looks like a filename, assume it is on the local filesystem and
-read its contents to summarize that content.
-
 {{#if context}}
+
+## Additional context to consider
 
 {{context}}
 {{/if}}
 
-Input: {{input}}
+## Output
+
+I will output the summary of the provided content.
+
+I will not explain my reasoning and I will not directly include any parts of the input.
+
+## Input
+
+{{input}}
