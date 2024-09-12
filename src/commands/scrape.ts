@@ -79,8 +79,12 @@ export default class Scrape extends Command {
 
                 if (response.data.success) {
                     scrapedData = response.data.data
-                    // Cache the scraped data
-                    await this.cache.set(cacheKey, JSON.stringify(scrapedData))
+                    // Cache the scraped data with metadata
+                    await this.cache.set(cacheKey, JSON.stringify({
+                        url: args.url,
+                        timestamp: Date.now(),
+                        data: scrapedData
+                    }))
                 } else {
                     this.error('Scraping failed')
                 }
