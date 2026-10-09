@@ -3,6 +3,7 @@ eve
 
 Enhanced Virtual Entity
 
+> ⚠️ This project was replaced by https://github.com/schlessera/brain-kit/ .
 
 [![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
 [![Version](https://img.shields.io/npm/v/eve.svg)](https://npmjs.org/package/eve)
