@@ -9,7 +9,7 @@ Enhanced Virtual Entity
 
 ---
 
-> ⚠️ This project was replaced by 👉 https://github.com/schlessera/brain-kit/ .
+> ⚠️ This project was superseded by 👉 https://github.com/schlessera/brain-kit/ .
 
 ---
 
